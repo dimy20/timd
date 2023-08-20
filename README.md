@@ -1,2 +1,2 @@
 # timd
-Tiny in-memory database.
+Websocket protocol implementation
