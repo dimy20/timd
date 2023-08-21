@@ -1,18 +1,17 @@
 #pragma once
 #include <stdio.h>
+#include <stdbool.h>
 
 #define MAX_MSG_SIZE 1024
 
-struct ReadBuffer{
-    ReadBuffer();
+typedef struct{
     char data[MAX_MSG_SIZE];
     size_t size;
-};
+}ReadBuffer;
 
-struct Conn{
-    Conn(int fd) : m_fd(fd) {};
-    bool init();
-    bool try_fill_read_buffer();
-    int m_fd;
-    ReadBuffer m_read_buffer;
-};
+typedef struct{
+    int fd;
+    ReadBuffer read_buffer;
+}Conn;
+
+bool conn_init(Conn *conn);

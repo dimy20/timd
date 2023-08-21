@@ -1,8 +1,7 @@
-
-
 #include <fcntl.h>
 #include <assert.h>
 #include <stdio.h>
+#include <stdbool.h>
 // Enable non blocking io on a socket.
 bool socket_make_nonblocking(int socket_fd){
     assert(socket_fd > 0);

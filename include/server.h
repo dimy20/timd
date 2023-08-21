@@ -1,27 +1,20 @@
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <memory>
+#include <stdint.h>
 #include <sys/epoll.h>
+#include <arpa/inet.h>
 
 #include "conn.h"
 
 #define MAX_EVENTS 128
+#define ADDR_STRING_MAX_SIZE 255
 
-struct Server{
-    Server(const char *host, uint16_t port) : 
-        m_host(host), m_port(port) {};
+typedef struct{
+    int fd;
+    int epoll_fd;
+    struct epoll_event events[MAX_EVENTS];
+    struct sockaddr_in server_addr;
+}Server;
 
-    bool init();
-    bool start_loop();
-    bool accept_new_connection(int client_fd);
-
-    int m_fd;
-    int m_epoll_fd;
-    std::string m_host;
-    uint16_t m_port;
-    std::vector<std::unique_ptr<Conn>> m_connections; // maps fd's to connections
-    struct epoll_event m_events[MAX_EVENTS];
-};
+bool sv_init(Server *server, const char *host, uint16_t port);
+bool sv_start_loop(Server *server);

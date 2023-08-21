@@ -1,18 +1,17 @@
 #include <stdio.h>
 #include "server.h"
+#include <stdlib.h>
 
 #define HOST "127.0.0.1"
 #define PORT 8080
 
+static Server server;
 int main(){
-    Server server(HOST, PORT);
-
-    if(!server.init()){
+    if(!sv_init(&server, HOST, PORT)){
         fprintf(stderr, "Failed to initialize server\n");
         exit(1);
     }
 
-    server.start_loop();
-
+    sv_start_loop(&server);
     return 0;
 }
