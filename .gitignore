@@ -2,3 +2,5 @@ build
 main
 compile_commands.json
 .cache
+cv/venv
+cv/assets
