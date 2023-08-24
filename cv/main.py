@@ -7,11 +7,11 @@ WINDOW_NAME = "scanner"
 
 def detect_edges(img):
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
     #Since edge detection is susceptible to noise in the image, 
     #first step is to remove the noise in the image with a Gaussian filter.
-    blured = cv2.GaussianBlur(gray_img, (11, 11), 0)
-    edged = cv2.Canny(blured, 100, 200)
+    blured = cv2.GaussianBlur(gray_img, (5, 5), 0)
+
+    edged = cv2.Canny(blured, 50, 200)
 
     return edged
 
@@ -22,10 +22,11 @@ def detect_countours(img):
     #so we sort the countours by area and only keep the bigger ones, which are the most likely
     # to be of interest.
     cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
+
     return cnts
 
 def main():
-    img = cv2.imread("assets/receipt.jpg")
+    img = cv2.imread("assets/receipt2.jpg")
 
     if img is None:
         print("failed to load image")
@@ -37,31 +38,33 @@ def main():
 
     edged = detect_edges(img)
     cnts = detect_countours(edged)
-
+    print(len(cnts))
 
     contoured_img = img.copy()
     paper_cnt_index = -1
-    max_peri = float('-inf')
+    max_area = float('-inf')
 
     for i, c in enumerate(cnts):
+
         peri = cv2.arcLength(c, True)
-        aproximated = cv2.approxPolyDP(c, 0.1 * peri, True)
+        aproximated = cv2.approxPolyDP(c, 0.02 * peri, True)
+        area = cv2.contourArea(c)
 
-        cv2.drawContours(contoured_img, [aproximated], 0, (240, 0, 159), 1)
-
-        print(f"num vertices: {len(aproximated)}, peri {peri}")
         #paper_cnt_index = i
-        if len(aproximated) == 4 and peri > max_peri:
+        if len(aproximated) == 4 and area > max_area:
             paper_cnt_index = i
-            max_peri = peri
+            max_area = area
+            print(f"num vertices: {len(aproximated)}, area {area}")
 
-    #assert paper_cnt_index != -1
 
+    assert paper_cnt_index != -1
 
+    screen_cnt = cnts[paper_cnt_index]
+    cv2.drawContours(contoured_img, [screen_cnt], 0, (240, 0, 159), 2)
 
     while True:
         cv2.imshow(WINDOW_NAME, contoured_img)
-        #cv2.imshow("not edged", contoured_img)
+        cv2.imshow("not edged", img)
 
         key = cv2.waitKey(1)
         if key == 27 or cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
