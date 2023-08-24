@@ -4,3 +4,4 @@ compile_commands.json
 .cache
 cv/venv
 cv/assets
+cv/__pycache__

@@ -2,8 +2,15 @@ import cv2
 import sys
 import math
 import numpy as np
+import transform
 
 WINDOW_NAME = "scanner"
+
+def resize_img(img : cv2.UMat, new_height: int) -> cv2.UMat:
+    (w, h) = img.shape[:2]
+    aspect = w // h
+    new_width = int(aspect * new_height)
+    return cv2.resize(img, (new_width, new_height))
 
 def detect_edges(img):
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -32,10 +39,7 @@ def main():
         print("failed to load image")
         return
 
-    (w, h) = img.shape[:2]
-    apsect = w / h
-    img = cv2.resize(img, (w // 2, h))
-
+    img = resize_img(img, 500)
     edged = detect_edges(img)
     cnts = detect_countours(edged)
     print(len(cnts))
@@ -43,6 +47,7 @@ def main():
     contoured_img = img.copy()
     paper_cnt_index = -1
     max_area = float('-inf')
+    aprox = cv2.UMat
 
     for i, c in enumerate(cnts):
 
@@ -54,6 +59,7 @@ def main():
         if len(aproximated) == 4 and area > max_area:
             paper_cnt_index = i
             max_area = area
+            aprox = aproximated
             print(f"num vertices: {len(aproximated)}, area {area}")
 
 
@@ -61,10 +67,12 @@ def main():
 
     screen_cnt = cnts[paper_cnt_index]
     cv2.drawContours(contoured_img, [screen_cnt], 0, (240, 0, 159), 2)
+    warped = transform.four_point_transform(img, aprox.reshape(4, 2))
+
 
     while True:
         cv2.imshow(WINDOW_NAME, contoured_img)
-        cv2.imshow("not edged", img)
+        cv2.imshow("not edged", warped)
 
         key = cv2.waitKey(1)
         if key == 27 or cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
